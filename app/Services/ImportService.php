@@ -13,6 +13,7 @@ use App\Domain\TypeEnum;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use phpDocumentor\Reflection\Types\Parent_;
+use Symfony\Component\VarDumper\Dumper\DataDumperInterface;
 
 class ImportService
 {
@@ -27,23 +28,24 @@ class ImportService
 
         chdir('data/in/');
         $files = glob("{*.dat}", GLOB_BRACE);
+        foreach ($files as $file) {
+            $fileName = $file;
+            $handle = fopen($fileName, "r");
 
-        $fileName = $files[0];
-        $handle = fopen($fileName, "r");
+            $collectionSalesman = new ArrayCollection();
+            $collectionCustomer = new ArrayCollection();
+            $collectionSales = new ArrayCollection();
 
-        $collectionSalesman = new ArrayCollection();
-        $collectionCustomer = new ArrayCollection();
-        $collectionSales = new ArrayCollection();
+            while ($line = fgetcsv($handle, 1000, ";")) {
+                $id = $this->getTypeId($line[0]);
 
-        while ($line = fgetcsv($handle, 1000, ";")) {
-            $id = $this->getTypeId($line[0]);
+                $this->validateType($id, $line[0], $collectionSalesman, $collectionCustomer, $collectionSales);
+            }
 
-            $this->validateType($id, $line[0], $collectionSalesman, $collectionCustomer, $collectionSales);
+            $result = $this->getResult($collectionSalesman, $collectionCustomer, $collectionSales);
+
+            $this->exportService->exportFile($result, $fileName);
         }
-
-        $result = $this->getResult($collectionSalesman, $collectionCustomer, $collectionSales);
-
-        $this->exportService->exportFile($result, $fileName);
     }
 
     public function validateType(string $id, string $line, $collectionSalesman, $collectionCustomer, $collectionSales)
@@ -105,6 +107,7 @@ class ImportService
             $matches[1] = '';
         }
 
+
         $items = $this->extractSalesItem($matches[1]);
 
         $sales = explode(',', $line);
@@ -121,6 +124,7 @@ class ImportService
 
         foreach ($items as $item) {
             $item = explode('­', $item);
+
             $collectionItems->add($this->importItems($item));
         }
 

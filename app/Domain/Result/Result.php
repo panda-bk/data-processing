@@ -46,35 +46,35 @@ class Result
         return $this->customerList;
     }
 
-    public function setMaxSale(Sales $sales) : array
+    public function setMaxSale(Sales $sales): array
     {
         if (!$this->maxSale) {
             $this->maxSale = [$sales->getSalesId(), $sales->getTotal()];
         }
 
-         if ($this->maxSale[1] < $sales->getTotal()) {
-             $this->maxSale = [$sales->getSalesId(), $sales->getTotal()];
-         }
+        if ($this->maxSale[1] < $sales->getTotal()) {
+            $this->maxSale = [$sales->getSalesId(), $sales->getTotal()];
+        }
 
-         return $this->maxSale;
+        return $this->maxSale;
     }
 
-    public function getMaxSale() : array
+    public function getMaxSale(): array
     {
         return $this->maxSale;
     }
 
-    public function getTotalCustomer() : int
+    public function getTotalCustomer(): int
     {
         return count($this->customerList);
     }
 
-    public function getTotalSalesman() : int
+    public function getTotalSalesman(): int
     {
         return count($this->salesmanList);
     }
 
-    public function getAverageWage() : float
+    public function getAverageWage(): float
     {
         $this->averageWage = array_sum($this->salesmanList) / $this->getTotalSalesman();
 
